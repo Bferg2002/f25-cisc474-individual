@@ -1,0 +1,35 @@
+erDiagram
+    USERS {
+        int user_id
+    }
+
+    COURSES {
+        int course_id
+    }
+
+    ENROLLMENT {
+        int user_id
+        int course_id
+        string final_grade
+    }
+
+    ASSIGNMENTS {
+        int assignment_id
+        int course_id
+    }
+
+    GRADES {
+        int user_id
+        int assignment_id
+        bool late
+        bool published
+        string grade
+        float score
+    }
+
+    USERS ||--o{ ENROLLMENT : enrolls
+    COURSES ||--o{ ENROLLMENT : contains
+
+    COURSES ||--o{ ASSIGNMENTS : has
+    USERS ||--o{ GRADES : receives
+    ASSIGNMENTS ||--o{ GRADES : graded_for

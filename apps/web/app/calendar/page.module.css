@@ -1,0 +1,65 @@
+.pageContainer {
+  margin-left: 160px; /* offset for sidebar */
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* Sidebar */
+.sidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  padding-top: 20px;
+}
+
+.sidenav .link {
+  display: block;
+  padding: 8px 16px;
+  color: #818181;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.sidenav .link:hover {
+  color: #f1f1f1;
+}
+
+/* Calendar styles */
+.calendarContainer {
+  margin-top: 20px;
+}
+
+.calendarHeader {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendarGrid > div {
+  border: 1px solid #ccc;
+  min-height: 80px;
+  padding: 5px;
+}
+
+.dueDate {
+  background-color: #fdd835; /* yellow highlight for due dates */
+  border: 1px solid #fbc02d;
+  font-weight: bold;
+}

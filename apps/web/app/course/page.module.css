@@ -1,0 +1,92 @@
+/* Main Canvas Sidebar - Left side */
+.mainSidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Course Navigation Sidebar - Second from left */
+.courseSidenav {
+  margin-top: 10%;
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 160px; /* Position next to main sidebar */
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Shared sidebar link styles */
+.mainSidenav .link,
+.courseSidenav .link {
+  display: block;
+  padding: 8px 16px;
+  color: #818181;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.mainSidenav .link:hover,
+.courseSidenav .link:hover {
+  color: #f1f1f1;
+}
+
+/* Legacy sidenav class for backward compatibility */
+.sidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.sidenav a,
+.sidenav .link {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+}
+
+.sidenav a:hover,
+.sidenav .link:hover {
+  color: #f1f1f1;
+}
+
+
+.flexContainer {
+  display: flex;
+  background-color: white; /* container background */
+}
+
+.flexContainer > div {
+  background-color: #f1f1f1; /* box background */
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+  border: 1px solid black; /* black border around each box */
+  margin-left: 50%;
+}
+
+.assignmentHeader{
+    padding: 14px 20px;
+    margin-left: 48%;
+}
+
+.heading{
+  margin-left: 48%;
+  margin-bottom: 20px;
+}

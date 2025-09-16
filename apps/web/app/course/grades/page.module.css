@@ -1,0 +1,203 @@
+/* Main Canvas Sidebar - Left side */
+.mainSidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Course Navigation Sidebar - Second from left */
+.courseSidenav {
+  margin-top: 10%;
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 160px; /* Position next to main sidebar */
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+/* Shared sidebar link styles */
+.mainSidenav .link,
+.courseSidenav .link {
+  display: block;
+  padding: 8px 16px;
+  color: #818181;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.mainSidenav .link:hover,
+.courseSidenav .link:hover {
+  color: #f1f1f1;
+}
+
+/* Legacy sidenav class for backward compatibility */
+.sidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  padding-top: 20px;
+}
+
+.sidenav a,
+.sidenav .link {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+}
+
+.sidenav a:hover,
+.sidenav .link:hover {
+  color: #f1f1f1;
+}
+
+/* Content containers adjusted for dual sidebars */
+.flexContainer {
+  display: flex;
+  background-color: white;
+  margin-left: 25%; /* Adjusted for dual sidebars */
+}
+
+.flexContainer > div {
+  background-color: #f1f1f1;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+  border: 1px solid black;
+}
+
+.assignmentHeader {
+  padding: 14px 20px;
+  margin-left: 340px; /* Adjusted for dual sidebars (160px + 160px + 20px) */
+}
+
+.heading {
+  margin-left: 340px; /* Adjusted for dual sidebars */
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Grades page specific styles */
+.gradesContainer {
+  margin-left: 340px; /* Account for both sidebars (160px + 160px + 20px) */
+  padding: 20px;
+  max-width: 800px;
+}
+
+.controlsRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 40px;
+  margin-bottom: 40px;
+  padding-bottom: 20px;
+}
+
+.courseDropdown,
+.arrangeDropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.courseDropdown label,
+.arrangeDropdown label,
+.arrangeDropdown p {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+  margin: 0;
+}
+
+.dropdown {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: white;
+  min-width: 120px;
+}
+
+.applyButton {
+  background-color: #555;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  height: fit-content;
+}
+
+.applyButton:hover {
+  background-color: #666;
+}
+
+.gradesTable {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  background-color: #f8f8f8;
+  border-bottom: 2px solid #ddd;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-bottom: 1px solid #eee;
+}
+
+.headerCell {
+  padding: 15px 20px;
+  font-weight: 600;
+  color: #555;
+  text-align: left;
+}
+
+.tableCell {
+  padding: 15px 20px;
+  color: #333;
+  text-align: left;
+}
+
+.tableRow:hover {
+  background-color: #f9f9f9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .mainSidenav,
+  .courseSidenav {
+    width: 120px;
+  }
+  
+  .courseSidenav {
+    left: 120px;
+  }
+  
+  .gradesContainer,
+  .heading,
+  .assignmentHeader {
+    margin-left: 260px; /* Adjusted for smaller sidebars */
+  }
+}

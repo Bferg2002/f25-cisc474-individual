@@ -1,0 +1,34 @@
+[
+  {
+    "userId": 2,
+    "assignmentId": 1,
+    "late": false,
+    "published": true,
+    "grade": "B",
+    "score": 85.0
+  },
+  {
+    "userId": 3,
+    "assignmentId": 1,
+    "late": false,
+    "published": true,
+    "grade": "A",
+    "score": 95.0
+  },
+  {
+    "userId": 2,
+    "assignmentId": 2,
+    "late": true,
+    "published": true,
+    "grade": "B+",
+    "score": 88.5
+  },
+  {
+    "userId": 2,
+    "assignmentId": 3,
+    "late": false,
+    "published": false,
+    "grade": "A-",
+    "score": 90.0
+  }
+]

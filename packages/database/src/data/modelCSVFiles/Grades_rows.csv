@@ -1,0 +1,5 @@
+userId,assignmentId,late,published,grade,score
+2,1,false,true,B,85
+2,2,true,true,B+,88.5
+2,3,false,false,A-,90
+3,1,false,true,A,95

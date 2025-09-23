@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
 
 datasource db {
   provider  = "postgresql"
@@ -7,14 +9,52 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/client"
+model User {
+  id           Int          @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  email        String       @unique
+  isInstructor Boolean      @default(false)
+  isAdmin      Boolean      @default(false)
+  enrollments  Enrollment[]
+  grades       Grades[]
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+model Enrollment {
+  userId     Int
+  courseId   Int
+  finalGrade String
+  course     Course @relation(fields: [courseId], references: [id])
+  user       User   @relation(fields: [userId], references: [id])
+
+  @@id([userId, courseId])
+}
+
+model Course {
+  id          Int          @id @default(autoincrement())
+  name        String
+  assignments Assignment[]
+  enrollments Enrollment[]
+}
+
+model Assignment {
+  id       Int      @unique
+  courseId Int
+  course   Course   @relation(fields: [courseId], references: [id])
+  Grades   Grades[]
+
+  @@id([id, courseId])
+}
+
+model Grades {
+  userId       Int
+  assignmentId Int
+  late         Boolean
+  published    Boolean
+  grade        String
+  score        Float
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+
+  @@unique([assignmentId, userId])
 }

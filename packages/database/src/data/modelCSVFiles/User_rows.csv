@@ -1,0 +1,4 @@
+id,firstName,lastName,email,isInstructor,isAdmin
+1,Alice,Smith,alice@example.com,true,false
+2,Bob,Johnson,bob@example.com,false,false
+3,Charlie,Brown,charlie@example.com,false,true

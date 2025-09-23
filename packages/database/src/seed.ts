@@ -1,36 +1,65 @@
-import { prisma } from "./client";
+import { PrismaClient } from '../generated/client';
+import fs from 'fs';
+import path from 'path';
 
-import type { User } from "../generated/client";
+const prisma = new PrismaClient();
 
-const DEFAULT_USERS = [
-  // Add your own user to pre-populate the database with
-  {
-    name: "Tim Apple",
-    email: "tim@apple.com",
-  },
-] as Array<Partial<User>>;
+// Utility function to read JSON files and parse to the given type
+function loadJson<T>(filename: string): T {
+  const filePath = path.join(__dirname, 'data', filename);
+  const fileContents = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(fileContents) as T;
+}
 
-(async () => {
-  try {
-    await Promise.all(
-      DEFAULT_USERS.map((user) =>
-        prisma.user.upsert({
-          where: {
-            email: user.email!,
-          },
-          update: {
-            ...user,
-          },
-          create: {
-            ...user,
-          },
-        })
-      )
-    );
-  } catch (error) {
-    console.error(error);
+async function main() {
+  // Load JSON data with correct shapes
+  const users = loadJson<Array<{
+    firstName: string;
+    lastName: string;
+    email: string;
+    isInstructor?: boolean;
+    isAdmin?: boolean;
+  }>>('users.json');
+
+  const courses = loadJson<Array<{
+    name: string;
+  }>>('courses.json');
+
+  const assignments = loadJson<Array<{
+    id: number;
+    courseId: number;
+  }>>('assignments.json');
+
+  const enrollments = loadJson<Array<{
+    userId: number;
+    courseId: number;
+    finalGrade: string; // required
+  }>>('enrollments.json');
+
+  const grades = loadJson<Array<{
+    userId: number;
+    assignmentId: number;
+    grade: string;
+    score: number;
+    late: boolean;       // required
+    published: boolean;  // required
+  }>>('grades.json');
+
+  // --- Seed in order of dependencies ---
+  await prisma.user.createMany({ data: users });
+  await prisma.course.createMany({ data: courses });
+  await prisma.assignment.createMany({ data: assignments });
+  await prisma.enrollment.createMany({ data: enrollments });
+  await prisma.grades.createMany({ data: grades });
+
+  console.log('✅ Database seeded successfully!');
+}
+
+main()
+  .catch((e) => {
+    console.error(e);
     process.exit(1);
-  } finally {
+  })
+  .finally(async () => {
     await prisma.$disconnect();
-  }
-})();
+  });

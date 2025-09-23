@@ -27,9 +27,17 @@ erDiagram
         float score
     }
 
+    <!--One USER can be linked to zero or many ENROLLMENT records-->
     USERS ||--o{ ENROLLMENT : enrolls
+
+    <!--One COURSE can be linked to zero or many ENROLLMENT records-->
     COURSES ||--o{ ENROLLMENT : contains
 
+    <!--One COURSE can be linked to zero or many ASSIGNMENT records-->
     COURSES ||--o{ ASSIGNMENTS : has
+
+    <!--One USER can be linked to zero or many GRADE records-->
     USERS ||--o{ GRADES : receives
+
+    <!--One ASSIGNMENT can be linked to zero or many GRADE records-->
     ASSIGNMENTS ||--o{ GRADES : graded_for

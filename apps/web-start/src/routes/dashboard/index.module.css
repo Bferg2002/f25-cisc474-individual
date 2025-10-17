@@ -1,0 +1,37 @@
+.flexContainer {
+  display: flex;
+  background-color: white; /* container background */
+  margin-left:25%;
+}
+
+.flexContainer > div {
+  background-color: #f1f1f1; /* box background */
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+  border: 1px solid black; /* black border around each box */
+}
+
+/* Sidebar */
+.sidenav {
+  height: 100%;
+  width: 160px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  padding-top: 20px;
+}
+
+.sidenav .link {
+  display: block;
+  padding: 8px 16px;
+  color: #818181;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.sidenav .link:hover {
+  color: #f1f1f1;
+}
+

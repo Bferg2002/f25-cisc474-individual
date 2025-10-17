@@ -1,19 +1,23 @@
-import Link from "next/link";
-import styles from "./page.module.css";
+import { Link, createFileRoute } from '@tanstack/react-router'
+import styles from './index.module.css'
 
-export default function CalendarPage() {
+export const Route = createFileRoute('/calendar/')({
+  component: RouteComponent,
+})
+
+function RouteComponent() {
   return (
     <div className={styles.pageContainer}>
       <h1 className={styles.heading}>Assignment Calendar</h1>
 
       <div className={styles.sidenav}>
-        <Link href="/dashboard" className={styles.link}>
+        <Link to="/dashboard" className={styles.link}>
           Dashboard
         </Link>
-        <Link href="/course/" className={styles.link}>
+        <Link to="." className={styles.link}>
           Courses
         </Link>
-        <Link href="/calendar" className={styles.link}>
+        <Link to="." className={styles.link}>
           Calendar
         </Link>
       </div>

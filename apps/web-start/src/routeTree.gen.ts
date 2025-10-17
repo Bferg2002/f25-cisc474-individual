@@ -10,33 +10,79 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as CourseIndexRouteImport } from './routes/course/index'
+import { Route as CalendarIndexRouteImport } from './routes/calendar/index'
+import { Route as CourseGradesIndexRouteImport } from './routes/course/grades/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseIndexRoute = CourseIndexRouteImport.update({
+  id: '/course/',
+  path: '/course/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CalendarIndexRoute = CalendarIndexRouteImport.update({
+  id: '/calendar/',
+  path: '/calendar/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CourseGradesIndexRoute = CourseGradesIndexRouteImport.update({
+  id: '/course/grades/',
+  path: '/course/grades/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarIndexRoute
+  '/course': typeof CourseIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/course/grades': typeof CourseGradesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/calendar': typeof CalendarIndexRoute
+  '/course': typeof CourseIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/course/grades': typeof CourseGradesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/calendar/': typeof CalendarIndexRoute
+  '/course/': typeof CourseIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/course/grades/': typeof CourseGradesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/calendar' | '/course' | '/dashboard' | '/course/grades'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/calendar' | '/course' | '/dashboard' | '/course/grades'
+  id:
+    | '__root__'
+    | '/'
+    | '/calendar/'
+    | '/course/'
+    | '/dashboard/'
+    | '/course/grades/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CalendarIndexRoute: typeof CalendarIndexRoute
+  CourseIndexRoute: typeof CourseIndexRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  CourseGradesIndexRoute: typeof CourseGradesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +94,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/': {
+      id: '/course/'
+      path: '/course'
+      fullPath: '/course'
+      preLoaderRoute: typeof CourseIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/calendar/': {
+      id: '/calendar/'
+      path: '/calendar'
+      fullPath: '/calendar'
+      preLoaderRoute: typeof CalendarIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/course/grades/': {
+      id: '/course/grades/'
+      path: '/course/grades'
+      fullPath: '/course/grades'
+      preLoaderRoute: typeof CourseGradesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CalendarIndexRoute: CalendarIndexRoute,
+  CourseIndexRoute: CourseIndexRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  CourseGradesIndexRoute: CourseGradesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

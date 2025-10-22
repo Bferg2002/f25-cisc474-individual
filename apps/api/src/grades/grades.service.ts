@@ -1,17 +1,32 @@
+// apps/api/src/grades/grades.service.ts
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma.service'; // make sure this path is correct
 
 @Injectable()
 export class GradesService {
   constructor(private prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.grades.findMany();
+  async findAll() {
+    return this.prisma.grades.findMany({
+      include: {
+        assignment: true, // include assignment to get names
+        user: true,
+      },
+    });
   }
 
-  findOne(userId: number, assignmentId: number) {
+  async findOne(userId: number, assignmentId: number) {
     return this.prisma.grades.findUnique({
-      where: { assignmentId_userId: { userId, assignmentId } },
+      where: {
+        assignmentId_userId: {
+          userId,
+          assignmentId,
+        },
+      },
+      include: {
+        assignment: true,
+        user: true,
+      },
     });
   }
 }

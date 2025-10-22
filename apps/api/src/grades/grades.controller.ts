@@ -11,7 +11,10 @@ export class GradesController {
   }
 
   @Get(':userId/:assignmentId')
-  findOne(@Param('userId') userId: string, @Param('assignmentId') assignmentId: string) {
+  findOne(
+    @Param('userId') userId: string,
+    @Param('assignmentId') assignmentId: string,
+  ) {
     return this.gradesService.findOne(+userId, +assignmentId);
   }
 }

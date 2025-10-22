@@ -26,7 +26,8 @@
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "inputs": ["$TURBO_DEFAULT$", "PORT", "HOST"]
     },
     "db:migrate:dev": {
       "cache": false,

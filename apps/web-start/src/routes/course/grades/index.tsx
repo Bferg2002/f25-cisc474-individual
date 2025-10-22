@@ -1,21 +1,31 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import styles from './index.module.css'
+import { Link, createFileRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
+import { fetchGrades } from '../../../integrations/fetcher';
+import styles from './index.module.css';
+import type { Grade } from '../../../integrations/fetcher';
 
 export const Route = createFileRoute('/course/grades/')({
   component: RouteComponent,
-})
+});
 
 function RouteComponent() {
+  const { data: grades, isLoading, error, refetch } = useQuery<Array<Grade>>({
+    queryKey: ['grades'],
+    queryFn: fetchGrades,
+  });
+
+  if (isLoading) return <div>Loading grades...</div>;
+  if (error) return <div>Something went wrong! {String(error)}</div>;
+
   return (
     <div className="p-6">
       <h1 className={styles.heading}>Grades for Bryant Ferguson</h1>
-      
-      {/* Main Canvas Sidebar - Left */}
+
       <div className={styles.mainSidenav}>
         <Link to="/dashboard" className={styles.link}>
           Dashboard
         </Link>
-        <Link to="." className={styles.link}>
+        <Link to="/course" className={styles.link}>
           Courses
         </Link>
         <Link to="/calendar" className={styles.link}>
@@ -23,12 +33,10 @@ function RouteComponent() {
         </Link>
       </div>
 
-      {/* Course Navigation Sidebar - Second from left */}
       <div className={styles.courseSidenav}>
-        <Link to="." className={styles.link}>
+        <Link to="/course" className={styles.link}>
           Home
         </Link>
-        {/* Placeholder links for pages that don't exist yet */}
         <span className={styles.linkDisabled}>Syllabus</span>
         <span className={styles.linkDisabled}>Assignments</span>
         <Link to="/course/grades" className={styles.link}>
@@ -44,29 +52,39 @@ function RouteComponent() {
               <option>CISC474</option>
             </select>
           </div>
-          
+
           <div className={styles.arrangeDropdown}>
             <label>Arrange By</label>
             <select className={styles.dropdown}>
-              <option>Due Date</option>
+              <option>Assignment</option>
+              <option>Score</option>
             </select>
           </div>
-          
-          <button className={styles.applyButton}>Apply</button>
+
+          <button className={styles.applyButton} onClick={() => refetch()}>
+            Apply
+          </button>
         </div>
 
         <div className={styles.gradesTable}>
           <div className={styles.tableHeader}>
-            <div className={styles.headerCell}>Name</div>
-            <div className={styles.headerCell}>Due</div>
+            <div className={styles.headerCell}>Assignment Name</div>
             <div className={styles.headerCell}>Score</div>
+            <div className={styles.headerCell}>Published</div>
+            <div className={styles.headerCell}>Late</div>
           </div>
-          
-          <div className={styles.tableRow}>
-            <div className={styles.tableCell}>Assignment 1</div>
-            <div className={styles.tableCell}>9/10/25</div>
-            <div className={styles.tableCell}>85/100</div>
-          </div>
+
+          {grades?.map((grade) => (
+            <div
+              key={`${grade.assignmentId}-${grade.userId}`}
+              className={styles.tableRow}
+            >
+              <div className={styles.tableCell}>{grade.assignment.name}</div>
+              <div className={styles.tableCell}>{grade.score}</div>
+              <div className={styles.tableCell}>{grade.published ? 'Yes' : 'No'}</div>
+              <div className={styles.tableCell}>{grade.late ? 'Yes' : 'No'}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

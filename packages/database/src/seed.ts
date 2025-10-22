@@ -28,6 +28,7 @@ async function main() {
   const assignments = loadJson<Array<{
     id: number;
     courseId: number;
+    name: string;
   }>>('assignments.json');
 
   const enrollments = loadJson<Array<{
@@ -45,12 +46,11 @@ async function main() {
     published: boolean;  // required
   }>>('grades.json');
 
-  // --- Seed in order of dependencies ---
-  await prisma.user.createMany({ data: users });
-  await prisma.course.createMany({ data: courses });
-  await prisma.assignment.createMany({ data: assignments });
-  await prisma.enrollment.createMany({ data: enrollments });
-  await prisma.grades.createMany({ data: grades });
+await prisma.user.createMany({ data: users, skipDuplicates: true });
+await prisma.course.createMany({ data: courses, skipDuplicates: true });
+await prisma.assignment.createMany({ data: assignments, skipDuplicates: true });
+await prisma.enrollment.createMany({ data: enrollments, skipDuplicates: true });
+await prisma.grades.createMany({ data: grades, skipDuplicates: true });
 
   console.log('✅ Database seeded successfully!');
 }

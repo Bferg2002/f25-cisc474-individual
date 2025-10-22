@@ -30,7 +30,7 @@ function RouteComponent() {
 
         <div className={styles.flexContainer}>
           <div>
-            <Link to="/course/grades">CISC474</Link>
+            <Link to="/course">CISC474</Link>
           </div>
           <div>CISC483</div>
           <div>CISC437</div>

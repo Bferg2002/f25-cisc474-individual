@@ -6,14 +6,14 @@ export class GradesController {
   constructor(private readonly gradesService: GradesService) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.gradesService.findAll();
   }
 
   @Get(':userId/:assignmentId')
-  findOne(
+  async findOne(
     @Param('userId') userId: string,
-    @Param('assignmentId') assignmentId: string,
+    @Param('assignmentId') assignmentId: string
   ) {
     return this.gradesService.findOne(+userId, +assignmentId);
   }

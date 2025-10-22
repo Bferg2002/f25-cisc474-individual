@@ -1,11 +1,9 @@
-/* eslint-disable turbo/no-undeclared-env-vars */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
-  app.enableCors(); // <-- ADD THIS
+  app.enableCors(); // ✅ ensures frontend can access API
 
   const port = process.env.PORT || 3000;
   const host = process.env.HOST || undefined;

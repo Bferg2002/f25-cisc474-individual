@@ -1,32 +1,32 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as process from 'process';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // ✅ Include your known frontend domains explicitly
   const allowedOrigins = [
-    process.env.FRONTEND_URL,             // Local frontend
-    process.env.PRODUCTION_FRONTEND_URL,  // Deployed frontend
+    'http://localhost:3000', // local frontend
+    'https://tanstack-start-app.btbf569708.workers.dev', // Cloudflare dev domain
+    'https://cisc474-individual-project.btbf569708.workers.dev', // your Worker alias
+    process.env.FRONTEND_URL, // environment-provided local URL (Render)
+    process.env.PRODUCTION_FRONTEND_URL, // environment-provided prod URL (Render)
   ].filter(Boolean);
 
+  // ✅ Enable CORS for the specific domains
   app.enableCors({
-  origin: (origin, callback) => {
-    const allowedOrigins = [
-      process.env.FRONTEND_URL,
-      process.env.PRODUCTION_FRONTEND_URL,
-    ].filter(Boolean);
-
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`🚫 CORS blocked: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true,
-});
-
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.warn(`🚫 CORS blocked request from: ${origin}`);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true,
+  });
 
   const port = process.env.PORT || 3000;
   const host = process.env.HOST || '0.0.0.0';

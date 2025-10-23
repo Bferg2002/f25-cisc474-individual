@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 
 import { LinksModule } from './links/links.module';
 import { UsersModule } from './users/users.module';
@@ -11,7 +12,9 @@ import { AppService } from './app.service';
 import { AppController } from './app.controller';
 
 @Module({
-  imports: [
+  imports: [ConfigModule.forRoot({
+      isGlobal: true, // makes env variables available everywhere
+    }),
     LinksModule,
     UsersModule,
     CoursesModule,

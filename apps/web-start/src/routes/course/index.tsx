@@ -3,24 +3,20 @@ import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-quer
 import { Suspense } from 'react';
 import { backendFetcher } from '../../integrations/fetcher';
 import styles from './index.module.css';
+import type { AssignmentOut } from "@repo/api";
 
 export const Route = createFileRoute('/course/')({
   component: RouteComponent,
 });
 
-type Assignment = {
-  id: number;
-  courseId: number;
-  name: string;
-};
 
 // Create a QueryClient at app level (or here for simplicity)
 const queryClient = new QueryClient();
 
 function AssignmentsList() {
-  const { data } = useQuery<Array<Assignment>>({
+  const { data } = useQuery<Array<AssignmentOut>>({
     queryKey: ['assignments'],
-    queryFn: () => backendFetcher<Array<Assignment>>('/assignments'),
+    queryFn: () => backendFetcher<Array<AssignmentOut>>('/assignments'),
   });
 
   const assignments = data ?? [];

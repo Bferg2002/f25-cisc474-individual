@@ -1,3 +1,5 @@
+import type { GradeOut } from '@repo/api/grades';
+
 export type Grade = {
   userId: number;
   assignmentId: number;
@@ -23,6 +25,25 @@ export async function fetchGrades(): Promise<Array<Grade>> {
   return backendFetcher<Array<Grade>>('/grades');
 }
 
+export async function fetchGradesByUser(userId: number): Promise<Array<GradeOut>> {
+  return backendFetcher<Array<GradeOut>>(`/grades/user/${userId}`);
+}
+
+
 export async function fetchCourses(): Promise<Array<Course>> {
   return backendFetcher<Array<Course>>('/courses');
+}
+
+export async function mutateBackend<T>(
+  endpoint: string,
+  method: string,
+  body?: any,
+): Promise<T> {
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) throw new Error('Failed to mutate ' + endpoint);
+  return res.json();
 }

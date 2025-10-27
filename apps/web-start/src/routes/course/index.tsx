@@ -2,12 +2,10 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { backendFetcher } from '../../integrations/fetcher';
+import RequireAuth from '../../components/RequireAuth'
 import styles from './index.module.css';
 import type { AssignmentOut } from "@repo/api";
 
-export const Route = createFileRoute('/course/')({
-  component: RouteComponent,
-});
 
 
 // Create a QueryClient at app level (or here for simplicity)
@@ -81,3 +79,11 @@ function RouteComponent() {
     </QueryClientProvider>
   );
 }
+
+export const Route = createFileRoute('/course/')({
+  component: () => (
+    <RequireAuth>
+      <RouteComponent />
+    </RequireAuth>
+  ),
+});

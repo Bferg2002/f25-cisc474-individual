@@ -1,42 +1,33 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import React from 'react'
-import styles from './index.module.css'
+import { createFileRoute } from '@tanstack/react-router'
+import { useAuth0 } from '@auth0/auth0-react'
+import { LoginButton } from '../components/LoginButton'
+import LogoutButton from '../components/LogoutButton'
 
 export const Route = createFileRoute('/')({
-  component: RouteComponent,
+  component: Index,
 })
 
-function RouteComponent() {
-    const [email, setEmail] = React.useState('')
-        const [password, setPassword] = React.useState('')
-    
-        const handleSubmit = (e: React.FormEvent) => {
-          e.preventDefault()
-          console.log('Logging in:', { email, password })
-        }
-  return (
-      <section className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className={styles.heading}>Welcome to Canvas!</h1>
+function Index() {
+  const { isAuthenticated } = useAuth0()
 
-        <form onSubmit={handleSubmit} className={styles.formContainer}>
-          <input
-            type="email"
-            placeholder="User ID"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={styles.inputBox}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className={styles.inputBox}
-          />
-          <Link to="/dashboard" className={styles.submitBtn}>
-            Sign In
-          </Link>
-        </form>
-      </section>
-    )
+  return (
+    <div>
+      <h1>Welcome!</h1>
+
+      {!isAuthenticated && (
+        <>
+          <p>Please log in to access course data.</p>
+          <LoginButton />
+        </>
+      )}
+
+      {isAuthenticated && (
+        <>
+          <p>You are logged in!</p>
+          <LogoutButton />
+          <p>Navigate to /courses or /home to see protected data.</p>
+        </>
+      )}
+    </div>
+  )
 }

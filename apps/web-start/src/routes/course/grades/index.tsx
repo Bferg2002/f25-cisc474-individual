@@ -2,14 +2,11 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher';
+import RequireAuth from '../../../components/RequireAuth'
 import styles from './index.module.css';
 import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades';
 
 
-// ✅ Fixed route path
-export const Route = createFileRoute('/course/grades/')({
-  component: RouteComponent,
-});
 
 function RouteComponent() {
   const queryClient = useQueryClient();
@@ -341,3 +338,11 @@ function UpdateGradeForm({ selectedGrade, updateMutation }: UpdateGradeFormProps
     </form>
   );
 }
+
+export const Route = createFileRoute('/course/grades/')({
+  component: () => (
+    <RequireAuth>
+      <RouteComponent />
+    </RequireAuth>
+  ),
+});

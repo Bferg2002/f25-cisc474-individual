@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as CourseIndexRouteImport } from './routes/course/index'
 import { Route as CalendarIndexRouteImport } from './routes/calendar/index'
@@ -18,6 +19,11 @@ import { Route as CourseGradesIndexRouteImport } from './routes/course/grades/in
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/home/',
+  path: '/home/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
@@ -46,6 +52,7 @@ export interface FileRoutesByFullPath {
   '/calendar': typeof CalendarIndexRoute
   '/course': typeof CourseIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/home': typeof HomeIndexRoute
   '/course/grades': typeof CourseGradesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -53,6 +60,7 @@ export interface FileRoutesByTo {
   '/calendar': typeof CalendarIndexRoute
   '/course': typeof CourseIndexRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/home': typeof HomeIndexRoute
   '/course/grades': typeof CourseGradesIndexRoute
 }
 export interface FileRoutesById {
@@ -61,19 +69,27 @@ export interface FileRoutesById {
   '/calendar/': typeof CalendarIndexRoute
   '/course/': typeof CourseIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/home/': typeof HomeIndexRoute
   '/course/grades/': typeof CourseGradesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/calendar' | '/course' | '/dashboard' | '/course/grades'
+  fullPaths:
+    | '/'
+    | '/calendar'
+    | '/course'
+    | '/dashboard'
+    | '/home'
+    | '/course/grades'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/calendar' | '/course' | '/dashboard' | '/course/grades'
+  to: '/' | '/calendar' | '/course' | '/dashboard' | '/home' | '/course/grades'
   id:
     | '__root__'
     | '/'
     | '/calendar/'
     | '/course/'
     | '/dashboard/'
+    | '/home/'
     | '/course/grades/'
   fileRoutesById: FileRoutesById
 }
@@ -82,6 +98,7 @@ export interface RootRouteChildren {
   CalendarIndexRoute: typeof CalendarIndexRoute
   CourseIndexRoute: typeof CourseIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  HomeIndexRoute: typeof HomeIndexRoute
   CourseGradesIndexRoute: typeof CourseGradesIndexRoute
 }
 
@@ -92,6 +109,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/': {
+      id: '/home/'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/': {
@@ -130,6 +154,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalendarIndexRoute: CalendarIndexRoute,
   CourseIndexRoute: CourseIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  HomeIndexRoute: HomeIndexRoute,
   CourseGradesIndexRoute: CourseGradesIndexRoute,
 }
 export const routeTree = rootRouteImport

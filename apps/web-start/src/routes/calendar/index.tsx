@@ -1,9 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import RequireAuth from '../../components/RequireAuth'
 import styles from './index.module.css'
-
-export const Route = createFileRoute('/calendar/')({
-  component: RouteComponent,
-})
 
 function RouteComponent() {
   return (
@@ -59,3 +56,11 @@ function RouteComponent() {
     </div>
   );
 }
+
+export const Route = createFileRoute('/calendar/')({
+  component: () => (
+    <RequireAuth>
+      <RouteComponent />
+    </RequireAuth>
+  ),
+});

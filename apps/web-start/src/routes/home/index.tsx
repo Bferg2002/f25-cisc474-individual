@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router'
 import { useAuth0 } from '@auth0/auth0-react'
 
 export const Route = createFileRoute('/home/')({
+  ssr: false,
   component: HomePage,
 })
 
@@ -34,3 +35,4 @@ function HomePage() {
     </div>
   )
 }
+

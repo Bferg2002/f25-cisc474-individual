@@ -41,6 +41,7 @@ function RouteComponent() {
 }
 
 export const Route = createFileRoute('/dashboard/')({
+  ssr: false,
   component: () => (
     <RequireAuth>
       <RouteComponent />

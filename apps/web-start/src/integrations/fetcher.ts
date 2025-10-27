@@ -1,5 +1,6 @@
-import { useAuth0 } from '@auth0/auth0-react'
-import type { GradeOut } from '@repo/api/grades'
+import { useAuth0 } from "@auth0/auth0-react"
+import type { GradeOut } from "@repo/api/grades"
+import type { AssignmentOut } from "@repo/api"
 
 export type Grade = {
   userId: number
@@ -14,85 +15,91 @@ export type Grade = {
 
 export type Course = { id: number; name: string }
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL
+export const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
-// ✅ Core fetcher without authentication
-export async function backendFetcher<T>(endpoint: string, token?: string): Promise<T> {
-  const headers: Record<string, string> = {}
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, { headers })
+// ✅ DRY secured fetch wrapper with better error debugging
+export async function secureFetch<T>(
+  endpoint: string,
+  token: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const res = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  })
 
   if (!res.ok) {
-    throw new Error('Failed to fetch ' + endpoint)
+    console.error(`❌ Backend error (${endpoint}):`, res.status, res.statusText)
+    const errText = await res.text().catch(() => "")
+    console.error("Server response:", errText)
+    throw new Error(`Fetch failed: ${res.status} ${endpoint}`)
   }
 
   return res.json()
 }
 
-// ✅ Existing functions now work in both unauth + auth mode
-export async function fetchGrades(token?: string): Promise<Array<Grade>> {
-  return backendFetcher<Array<Grade>>('/grades', token)
+// ✅ API functions
+export async function fetchCourses(token: string): Promise<Array<Course>> {
+  return secureFetch<Array<Course>>("/courses", token)
 }
 
-export async function fetchGradesByUser(userId: number, token?: string): Promise<Array<GradeOut>> {
-  return backendFetcher<Array<GradeOut>>(`/grades/user/${userId}`, token)
+export async function fetchGrades(token: string): Promise<Array<Grade>> {
+  return secureFetch<Array<Grade>>("/grades", token)
 }
 
-export async function fetchCourses(token?: string): Promise<Array<Course>> {
-  return backendFetcher<Array<Course>>('/courses', token)
+export async function fetchGradesByUser(
+  userId: number,
+  token: string
+): Promise<Array<GradeOut>> {
+  return secureFetch<Array<GradeOut>>(`/grades/user/${userId}`, token)
+}
+
+// ✅ NEW: assignments fetch
+export async function fetchAssignments(
+  token: string
+): Promise<Array<AssignmentOut>> {
+  return secureFetch<Array<AssignmentOut>>("/assignments", token)
 }
 
 export async function mutateBackend<T>(
   endpoint: string,
   method: string,
-  body?: any,
-  token?: string
+  body: any,
+  token: string
 ): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
-
-  if (token) {
-    headers.Authorization = `Bearer ${token}`
-  }
-
-  const res = await fetch(`${BASE_URL}${endpoint}`, {
+  return secureFetch<T>(endpoint, token, {
     method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
   })
-
-  if (!res.ok) {
-    throw new Error('Failed to mutate ' + endpoint)
-  }
-
-  return res.json()
 }
 
-// ✅ Auth wrapper hook that adds token automatically
-export const useBackendApi = () => {
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0()
+// ✅ Hook — always includes audience + proper scopes ✅
+export function useBackendApi() {
+  const { getAccessTokenSilently } = useAuth0()
 
-  const apiFetcher = async <T>(fn: (token?: string) => Promise<T>) => {
-    if (isAuthenticated) {
-      const token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-        },
-      })
-      return fn(token)
-    }
-    throw new Error('User is not authenticated')
+  const withToken = async <T>(fn: (token: string) => Promise<T>) => {
+    const token = await getAccessTokenSilently({
+      authorizationParams: {
+        audience: import.meta.env.VITE_AUTH0_AUDIENCE,
+        scope: "read:assignments read:courses read:grades",
+      },
+    })
+    return fn(token)
   }
 
   return {
-    fetchCourses: () => apiFetcher(fetchCourses),
-    fetchGrades: () => apiFetcher(fetchGrades),
-    fetchGradesByUser: (id: number) => apiFetcher((token) => fetchGradesByUser(id, token)),
+    fetchCourses: () => withToken(fetchCourses),
+    fetchGrades: () => withToken(fetchGrades),
+    fetchAssignments: () => withToken(fetchAssignments),
+    fetchGradesByUser: (id: number) =>
+      withToken((t) => fetchGradesByUser(id, t)),
     mutateBackend: (endpoint: string, method: string, body?: any) =>
-      apiFetcher((token) => mutateBackend(endpoint, method, body, token)),
+      withToken((t) => mutateBackend(endpoint, method, body, t)),
   }
 }

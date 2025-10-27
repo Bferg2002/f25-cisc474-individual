@@ -58,6 +58,7 @@ function RouteComponent() {
 }
 
 export const Route = createFileRoute('/calendar/')({
+  ssr: false,
   component: () => (
     <RequireAuth>
       <RouteComponent />

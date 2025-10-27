@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher';
 import RequireAuth from '../../../components/RequireAuth'
+import LogoutButton from '../../../components/LogoutButton' // ✅ Import it here
 import styles from './index.module.css';
 import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades';
 
@@ -90,6 +91,10 @@ function RouteComponent() {
         {/* ✅ Link fixed */}
       <Link to="/course/grades" className={styles.link}>Grades</Link>
       </div>
+
+      <div style={{ marginTop: "auto", padding: "1rem" }}>
+                        <LogoutButton />
+                      </div>
 
       {/* TABLE */}
       <div className={styles.gradesContainer}>

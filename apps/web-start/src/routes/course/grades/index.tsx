@@ -5,6 +5,7 @@ import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher'
 import styles from './index.module.css';
 import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades';
 
+
 // ✅ Fixed route path
 export const Route = createFileRoute('/course/grades/')({
   component: RouteComponent,

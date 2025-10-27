@@ -10,9 +10,14 @@ import { GradesModule } from './grades/grades.module';
 
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from '@nestjs/passport';
 
 @Module({
-  imports: [ConfigModule.forRoot({
+  imports: [
+    ConfigModule.forRoot({
       isGlobal: true, // makes env variables available everywhere
     }),
     LinksModule,
@@ -21,8 +26,15 @@ import { AppController } from './app.controller';
     EnrollmentsModule,
     AssignmentsModule,
     GradesModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard('jwt'),
+    },
+  ],
 })
 export class AppModule {}

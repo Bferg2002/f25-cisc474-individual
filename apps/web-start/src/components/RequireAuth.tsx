@@ -1,20 +1,18 @@
-// components/RequireAuth.tsx
-import { useAuth0 } from "@auth0/auth0-react"
+import { useEffect } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 
 export default function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+  const { isAuthenticated, isLoading, loginWithRedirect, error } = useAuth0();
 
-  // ⏳ Wait until Auth0 finishes checking session
-  if (isLoading) {
-    return <p>Loading authentication...</p>
-  }
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !error) {
+      loginWithRedirect();
+    }
+  }, [isLoading, isAuthenticated, loginWithRedirect, error]);
 
-  // ❌ Only redirect once we are certain they are not logged in
-  if (!isAuthenticated) {
-    loginWithRedirect()
-    return null
-  }
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+  if (!isAuthenticated) return null;
 
-  // ✅ User is authenticated — show protected page
-  return <>{children}</>
+  return <>{children}</>;
 }

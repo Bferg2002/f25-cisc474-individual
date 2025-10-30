@@ -1,7 +1,18 @@
-import { Controller, Get, Param, Post, Body, Patch, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Body,
+  Patch,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { GradesService } from './grades.service';
 import { GradeCreateIn, GradeUpdateIn } from '@repo/api/grades';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt')) // ✅ Protect *all* routes in this controller
 @Controller('grades')
 export class GradesController {
   constructor(private readonly gradesService: GradesService) {}
@@ -34,17 +45,20 @@ export class GradesController {
   }
 
   // ──────────────────────────────
-  // PUT — Update grade
+  // PATCH — Update grade
   // ──────────────────────────────
   @Patch(':userId/:assignmentId')
-async update(
-  @Param('userId') userId: string,
-  @Param('assignmentId') assignmentId: string,
-  @Body() updateGradeDto: GradeUpdateIn,
-) {
-  return this.gradesService.update(Number(userId), Number(assignmentId), updateGradeDto);
-}
-
+  async update(
+    @Param('userId') userId: string,
+    @Param('assignmentId') assignmentId: string,
+    @Body() updateGradeDto: GradeUpdateIn,
+  ) {
+    return this.gradesService.update(
+      Number(userId),
+      Number(assignmentId),
+      updateGradeDto,
+    );
+  }
 
   // ──────────────────────────────
   // DELETE — Delete grade

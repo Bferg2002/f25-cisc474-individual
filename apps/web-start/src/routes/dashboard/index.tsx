@@ -12,9 +12,8 @@ function RouteComponent() {
         <Link to="/dashboard" className={styles.link}>
           Dashboard
         </Link>
-        <Link to="." className={styles.link}>
-          Courses
-        </Link>
+                  <Link to="/course/grades" className={styles.link}>Grades</Link>
+
         <Link to="/calendar" className={styles.link}>
           Calendar
         </Link>

@@ -178,5 +178,21 @@ export class GradesService {
     throw new InternalServerErrorException('Failed to fetch user grades');
   }
 }
+// ──────────────────────────────
+// GET — All grades for a specific course + user
+// ──────────────────────────────
+async findAllForCourseAndUser(courseId: number, userId: number) {
+  return this.prisma.grades.findMany({
+    where: { userId },
+    include: {
+      assignment: { select: { id: true, name: true, courseId: true } },
+      user: true,
+    },
+  })
+}
+
+
 
 }
+
+

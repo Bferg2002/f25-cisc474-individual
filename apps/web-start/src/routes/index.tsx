@@ -1,33 +1,24 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { useAuth0 } from '@auth0/auth0-react'
-import { LoginButton } from '../components/LoginButton'
-import LogoutButton from '../components/LogoutButton'
+import { Link, createFileRoute } from '@tanstack/react-router';
+import LoginButton from '../components/LoginButton';
+import styles from './index.module.css';
 
 export const Route = createFileRoute('/')({
-  component: Index,
-})
+  component: HomePage,
+});
 
-function Index() {
-  const { isAuthenticated } = useAuth0()
-
+function HomePage() {
   return (
-    <div>
-      <h1>Welcome!</h1>
+    <section className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className={styles.heading}>Welcome to Canvas!</h1>
+      <p className={styles.subtext}>Please sign in to access your courses.</p>
 
-      {!isAuthenticated && (
-        <>
-          <p>Please log in to access course data.</p>
-          <LoginButton />
-        </>
-      )}
+      <LoginButton />
 
-      {isAuthenticated && (
-        <>
-          <p>You are logged in!</p>
-          <LogoutButton />
-          <p>Navigate to /courses or /home to see protected data.</p>
-        </>
-      )}
-    </div>
-  )
+      <hr className="my-6 w-1/2 border-gray-400" />
+
+      <Link to="/home" className={styles.link}>
+        Go to Home (after login)
+      </Link>
+    </section>
+  );
 }

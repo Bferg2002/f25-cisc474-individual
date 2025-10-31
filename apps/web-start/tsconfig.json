@@ -1,11 +1,51 @@
 {
-  "extends": "@repo/typescript-config/tanstack.json",
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    /* ✅ Core React/Vite setup */
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Bundler",
+
+    /* ✅ Clean build and flexible typing */
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+
+    /* ✅ Path & type resolution for monorepo */
+    "baseUrl": "./src",
+    "paths": {
+      "@tanstack/*": ["../../node_modules/@tanstack/*"],
+      "@auth0/*": ["../../node_modules/@auth0/*"]
+    },
+    "types": ["node", "vite/client", "react", "react-dom"],
+    "typeRoots": [
+      "../../node_modules/@types",
+      "../../node_modules"
+    ],
+
+    /* ✅ Output options (optional but recommended) */
+    "outDir": "dist",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
+  },
+
+  /* ✅ Included sources */
   "include": [
+    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "eslint.config.js",
-    "prettier.config.js",
-    "vite.config.js"
+    "tsup.config.ts",
+    "../**/*.d.ts"
   ],
-  "exclude": ["node_modules"]
+
+  /* ✅ Exclusions */
+  "exclude": ["node_modules", "dist"],
+
+  /* ✅ References to sibling packages */
+  "references": [
+    { "path": "../../packages/ui" },
+    { "path": "../../packages/database" }
+  ]
 }

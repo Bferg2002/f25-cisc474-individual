@@ -1,58 +1,32 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
 import { Suspense } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { useAuth0 } from '@auth0/auth0-react'
-import RequireAuth from '../../components/RequireAuth'
+import { useAuth0 } from '@auth0/auth0-react'     // ✅ added
+import { backendFetcher } from '../../integrations/fetcher'
 import LogoutButton from '../../components/LogoutButton'
 import styles from './index.module.css'
-import type { AssignmentOut } from "@repo/api"
+import type { AssignmentOut } from '@repo/api'
 
 export const Route = createFileRoute('/course/')({
-  ssr: false,
-  component: () => (
-    <RequireAuth>
-      <CoursePage />
-    </RequireAuth>
-  ),
+  component: RouteComponent,
 })
+
+// Create a QueryClient at app level (or here for simplicity)
+const queryClient = new QueryClient()
 
 function AssignmentsList() {
   const { getAccessTokenSilently } = useAuth0()
 
   const { data, isLoading, error } = useQuery<Array<AssignmentOut>>({
     queryKey: ['assignments'],
-    queryFn: async () => {
-  const token = await getAccessTokenSilently({
-    authorizationParams: {
-      audience: import.meta.env.VITE_AUTH0_AUDIENCE,
-      scope: "read:assignments read:courses read:grades"
-    },
+    queryFn: () => backendFetcher<Array<AssignmentOut>>('/assignments'),
   })
 
-  const res = await fetch(
-    `${import.meta.env.VITE_BACKEND_URL}/assignments`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  )
+  const assignments = data ?? []
 
-  if (!res.ok) {
-    console.error("❌ Assignments fetch failed:", res.status)
-    throw new Error(`Failed to load assignments: ${res.status}`)
-  }
-
-  return res.json()
-},
-
-  })
-
-  if (isLoading) return <p>Loading assignments...</p>
-  if (error)
-    return <p style={{ color: 'red' }}>Error loading assignments</p>
-
-  const overdueAssignments = data?.slice(0, 1) ?? []
-  const upcomingAssignments = data?.slice(1, 2) ?? []
-  const pastAssignments = data?.slice(2) ?? []
+  const overdueAssignments = assignments.slice(0, 1)
+  const upcomingAssignments = assignments.slice(1, 2)
+  const pastAssignments = assignments.slice(2)
 
   return (
     <>
@@ -80,7 +54,18 @@ function AssignmentsList() {
   )
 }
 
-function CoursePage() {
+function RouteComponent() {
+  const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+
+  // ✅ Wait for Auth0 to load
+  if (isLoading) return <div>Loading authentication...</div>
+
+  // ✅ Redirect if not logged in
+  if (!isAuthenticated) {
+    loginWithRedirect()
+    return null
+  }
+
   return (
     <div className={styles.pageContainer}>
       {/* ✅ Main Canvas Navigation */}
@@ -93,8 +78,17 @@ function CoursePage() {
 
       <div className={styles.contentWrapper}>
         <h1 className={styles.heading}>CISC474</h1>
+        <h1 className="text-2xl font-bold mb-4">Course</h1>
 
-        {/* ✅ Course Sub Navigation */}
+        {/* Main Canvas Sidebar - Left */}
+        <div className={styles.mainSidenav}>
+          <Link to="/dashboard" className={styles.link}>Dashboard</Link>
+          <Link to="." className={styles.link}>Courses</Link>
+          <Link to="/calendar" className={styles.link}>Calendar</Link>
+          <LogoutButton />
+        </div>
+
+        {/* Course Navigation Sidebar - Second from left */}
         <div className={styles.courseSidenav}>
           <Link to="/course" className={styles.link}>Home</Link>
           <Link to="/course" className={styles.link}>Syllabus</Link>
@@ -107,6 +101,6 @@ function CoursePage() {
           <AssignmentsList />
         </Suspense>
       </div>
-    </div>
+    </QueryClientProvider>
   )
 }

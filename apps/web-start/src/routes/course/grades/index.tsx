@@ -1,40 +1,53 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { useBackendApi } from '../../../integrations/fetcher'
-import RequireAuth from '../../../components/RequireAuth'
+import { useAuth0 } from '@auth0/auth0-react'       // ✅ added
+import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher'
 import LogoutButton from '../../../components/LogoutButton'
 import styles from './index.module.css'
 import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades'
-import type { UseMutationResult } from '@tanstack/react-query'
+
+// ✅ Protect route with Auth0
+export const Route = createFileRoute('/course/grades/')({
+  component: RouteComponent,
+})
 
 function RouteComponent() {
+  const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+
+  // Wait for Auth0
+  if (isLoading) return <div>Loading authentication...</div>
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    loginWithRedirect()
+    return null
+  }
+
   const queryClient = useQueryClient()
-  const { fetchGradesByUser, mutateBackend } = useBackendApi()
 
-  const currentUserId = 2 // ✅ later replaced w/ Auth0 user id
+  // ✅ Use numeric user ID for DB-based logic
+  const currentUserId = 1 // TEMP: Replace with your numeric ID system later
+  const courseId = 1
 
-  const {
-    data: grades,
-    isLoading,
-    error,
-  } = useQuery<Array<GradeOut>>({
-    queryKey: ['grades', currentUserId],
-    queryFn: () => fetchGradesByUser(currentUserId),
+  // ✅ Fetch grades
+  const { data: grades, isLoading: loadingGrades, error } = useQuery<Array<GradeOut>>({
+    queryKey: ['grades', courseId, currentUserId],
+    queryFn: () => fetchGradesByUser(courseId, currentUserId),
   })
 
   const [selectedGrade, setSelectedGrade] = useState<GradeOut | null>(null)
 
-  // ✅ CREATE (returns unknown → TS happy)
-  const createMutation = useMutation<
-    unknown,
-    Error,
-    GradeCreateIn
-  >({
-    mutationFn: (newGrade) =>
-      mutateBackend('/grades', 'POST', newGrade),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['grades', currentUserId] }),
+  // CREATE
+  const createMutation = useMutation({
+    mutationFn: (newGrade: GradeCreateIn) =>
+      mutateBackend<GradeOut>('/grades', 'POST', newGrade),
+    onSuccess: (createdGrade: GradeOut) => {
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) => [
+        ...(old ?? []),
+        createdGrade,
+      ])
+    },
   })
 
   // ✅ UPDATE
@@ -49,8 +62,14 @@ function RouteComponent() {
         'PATCH',
         updated
       ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['grades', currentUserId] })
+    onSuccess: (updatedGrade: GradeOut) => {
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) =>
+        (old ?? []).map((g) =>
+          g.userId === updatedGrade.userId && g.assignmentId === updatedGrade.assignmentId
+            ? updatedGrade
+            : g,
+        ),
+      )
       setSelectedGrade(null)
     },
   })
@@ -67,22 +86,28 @@ function RouteComponent() {
         'DELETE',
         {}
       ),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['grades', currentUserId] }),
+    onSuccess: (_, vars) => {
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) =>
+        (old ?? []).filter(
+          (g) => !(g.userId === vars.userId && g.assignmentId === vars.assignmentId),
+        ),
+      )
+    },
   })
 
-  if (isLoading) return <div>Loading grades...</div>
+  if (loadingGrades) return <div>Loading grades...</div>
   if (error) return <div>Something went wrong! {String(error)}</div>
 
   return (
     <div className="p-6">
-      <h1 className={styles.heading}>Grades for Bryant Ferguson</h1>
+      <h1 className={styles.heading}>Grades for {user?.name ?? 'Demo User'}</h1>
 
       {/* Main Sidebar */}
       <div className={styles.mainSidenav}>
         <Link to="/dashboard" className={styles.link}>Dashboard</Link>
         <Link to="/course" className={styles.link}>Courses</Link>
         <Link to="/calendar" className={styles.link}>Calendar</Link>
+        <LogoutButton />
       </div>
 
       {/* Course Sidebar */}
@@ -141,16 +166,12 @@ function RouteComponent() {
   )
 }
 
-// ✅ Shared card UI
-function FormCard({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ background: '#fafafa', padding: '1rem 1.5rem', borderRadius: '10px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', minWidth: '320px' }}>
-      {children}
-    </div>
-  )
-}
+// ============ TABLE ============
+function GradesTable({ grades, onEdit, onDelete }) {
+  if (!grades.length) {
+    return <div style={{ marginTop: '1rem', color: '#777' }}>No grades found.</div>
+  }
 
-function GradesTable({ grades, onEdit, onDelete }: { grades: GradeOut[], onEdit: (g: GradeOut)=>void, onDelete: (g: GradeOut)=>void }) {
   return (
     <div className={styles.gradesTable}>
       <div className={styles.tableHeader}>
@@ -162,14 +183,17 @@ function GradesTable({ grades, onEdit, onDelete }: { grades: GradeOut[], onEdit:
         <div className={styles.headerCell}>Actions</div>
       </div>
 
-      {grades.map((g) => (
-        <div key={`${g.assignmentId}-${g.userId}`} className={styles.tableRow}>
-          <div className={styles.tableCell}>{g.assignment.name}</div>
-          <div className={styles.tableCell}>{g.score}</div>
-          <div className={styles.tableCell}>{g.grade ?? "—"}</div>
-          <div className={styles.tableCell}>{g.published ? "Yes" : "No"}</div>
-          <div className={styles.tableCell} style={{ color: g.late ? 'red' : 'green' }}>
-            {g.late ? "Late" : "On Time"}
+      {grades.map((grade) => (
+        <div key={`${grade.assignmentId}-${grade.userId}`} className={styles.tableRow}>
+          <div className={styles.tableCell}>{grade.assignment?.name ?? 'Unknown'}</div>
+          <div className={styles.tableCell}>{grade.score}</div>
+          <div className={styles.tableCell}>{grade.grade || '—'}</div>
+          <div className={styles.tableCell}>{grade.published ? 'Yes' : 'No'}</div>
+          <div
+            className={styles.tableCell}
+            style={{ color: grade.late ? 'red' : 'green', fontWeight: 500 }}
+          >
+            {grade.late ? 'Late' : 'On Time'}
           </div>
           <div className={styles.tableCell}>
             <button onClick={() => onEdit(g)} style={{ marginRight: '0.5rem' }}>✏️</button>
@@ -181,21 +205,14 @@ function GradesTable({ grades, onEdit, onDelete }: { grades: GradeOut[], onEdit:
   )
 }
 
-// ✅ CREATE FORM
-function CreateGradeForm({
-  createMutation,
-  currentUserId,
-}: {
-  createMutation: UseMutationResult<unknown, unknown, any, unknown>
-  currentUserId: number
-}) {
+// ============ CREATE FORM ============
+function CreateGradeForm({ createMutation, currentUserId }) {
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
         const form = e.target as HTMLFormElement
         const data = new FormData(form)
-
         createMutation.mutate({
           userId: currentUserId,
           assignmentId: Number(data.get('assignmentId')),
@@ -204,8 +221,8 @@ function CreateGradeForm({
           late: data.get('late') === 'true',
           published: data.get('published') === 'true',
         })
-
         form.reset()
+        setTimeout(() => createMutation.reset(), 1500)
       }}
     >
       <h3>Create Grade</h3>
@@ -230,9 +247,7 @@ function CreateGradeForm({
         <option value="false">Not Published</option>
       </select>
 
-      <button type="submit" disabled={createMutation.isPending}>
-        ➕ Create
-      </button>
+      <button type="submit" disabled={createMutation.isPending}>➕ Create</button>
 
       {createMutation.isSuccess && <div style={{ color: 'green' }}>✅ Created!</div>}
       {createMutation.isError && (
@@ -247,14 +262,8 @@ function CreateGradeForm({
   )
 }
 
-// ✅ UPDATE FORM
-function UpdateGradeForm({
-  selectedGrade,
-  updateMutation,
-}: {
-  selectedGrade: GradeOut | null
-  updateMutation: UseMutationResult<unknown, unknown, any, unknown>
-}) {
+// ============ UPDATE FORM ============
+function UpdateGradeForm({ selectedGrade, updateMutation }) {
   if (!selectedGrade) {
     return <div>Click ✏️ Edit to populate the update form.</div>
   }
@@ -265,7 +274,6 @@ function UpdateGradeForm({
         e.preventDefault()
         const form = e.target as HTMLFormElement
         const data = new FormData(form)
-
         updateMutation.mutate({
           userId: selectedGrade.userId,
           assignmentId: selectedGrade.assignmentId,
@@ -280,8 +288,8 @@ function UpdateGradeForm({
               ? selectedGrade.published
               : data.get('published') === 'true',
         })
-
         form.reset()
+        setTimeout(() => updateMutation.reset(), 1500)
       }}
     >
       <h3>Update Grade</h3>

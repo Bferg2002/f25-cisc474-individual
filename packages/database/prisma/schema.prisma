@@ -9,16 +9,28 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model User {
-  id           Int          @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  email        String       @unique
-  isInstructor Boolean      @default(false)
-  isAdmin      Boolean      @default(false)
-  enrollments  Enrollment[]
-  grades       Grades[]
+model Authentication {
+  id          Int     @id @default(autoincrement())
+  provider     String
+  providerId   String
+  userId       Int
+  user         User    @relation(fields: [userId], references: [id])
+
+  @@unique([provider, providerId])
 }
+
+model User {
+  id               Int               @id @default(autoincrement())
+  firstName        String?           // ← optional
+  lastName         String?           // ← optional
+  email            String? @unique   // ← optional
+  isInstructor     Boolean           @default(false)
+  isAdmin          Boolean           @default(false)
+  enrollments      Enrollment[]
+  grades           Grades[]
+  authentications  Authentication[]
+}
+
 
 model Enrollment {
   userId     Int

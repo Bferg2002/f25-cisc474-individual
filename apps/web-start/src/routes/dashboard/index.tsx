@@ -1,4 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import LogoutButton from '../../components/LogoutButton'
 import styles from './index.module.css'
 
 export const Route = createFileRoute('/dashboard/')({
@@ -20,8 +21,8 @@ function RouteComponent() {
           <Link to="/calendar" className={styles.link}>
             Calendar
           </Link>
-        </div>
-
+     <LogoutButton />
+      </div>
         <div className={styles.flexContainer}>
           <div>CISC108</div>
           <div>CISC106</div>

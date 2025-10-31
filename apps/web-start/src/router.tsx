@@ -1,26 +1,60 @@
-import * as React from 'react'
-import { createRouter } from '@tanstack/react-router'
-import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
-import * as TanstackQuery from './integrations/root-provider'
-import { routeTree } from './routeTree.gen'
+import { createRouter } from '@tanstack/react-router';
+import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query';
+import { Auth0Provider } from '@auth0/auth0-react';
+import * as TanstackQuery from './integrations/root-provider';
 
-// Create router with React Query context
+// Import the generated route tree
+import { routeTree } from './routeTree.gen';
+
+// Create a new router instance
 export const getRouter = () => {
-  const rqContext = TanstackQuery.getContext()
+  const rqContext = TanstackQuery.getContext();
+
+  // Create the redirect URI based on the current origin, which may be undefined during SSR
+  const redirect_uri =
+    typeof window !== 'undefined'
+      ? window.location.origin + '/home'
+      : undefined;
 
   const router = createRouter({
-    routeTree, // Uses all pages from src/routes automatically
+    routeTree,
     context: { ...rqContext },
     defaultPreload: 'intent',
-    Wrap: (props: { children: React.ReactNode }) => (
-      <TanstackQuery.Provider {...rqContext}>{props.children}</TanstackQuery.Provider>
+    Wrap: (props: { children: React.ReactNode }) => {
+      return (
+        <Auth0Provider
+          domain={import.meta.env.VITE_AUTH0_DOMAIN}
+          clientId={import.meta.env.VITE_AUTH0_CLIENT_ID}
+          authorizationParams={{
+            redirect_uri: redirect_uri,
+          }}
+        >
+          <TanstackQuery.Provider {...rqContext}>
+            {props.children}
+          </TanstackQuery.Provider>
+        </Auth0Provider>
+      );
+    },
+
+    // 🧩 Added fallback for undefined routes (fixes NotFound warning)
+    defaultNotFoundComponent: () => (
+      <div
+        style={{
+          padding: '2rem',
+          textAlign: 'center',
+          fontFamily: 'system-ui, sans-serif',
+        }}
+      >
+        <h2>404 – Page Not Found</h2>
+        <p>The route you’re looking for doesn’t exist.</p>
+      </div>
     ),
-  })
+  });
 
   setupRouterSsrQueryIntegration({
     router,
     queryClient: rqContext.queryClient,
-  })
+  });
 
-  return router
-}
+  return router;
+};

@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import { backendFetcher } from '../../integrations/fetcher';
+import LogoutButton from '../../components/LogoutButton'
 import styles from './index.module.css';
 import type { AssignmentOut } from "@repo/api";
 
@@ -63,7 +64,8 @@ function RouteComponent() {
           <Link to="/dashboard" className={styles.link}>Dashboard</Link>
           <Link to="." className={styles.link}>Courses</Link>
           <Link to="/calendar" className={styles.link}>Calendar</Link>
-        </div>
+             <LogoutButton />
+      </div>
 
         {/* Course Navigation Sidebar - Second from left */}
         <div className={styles.courseSidenav}>

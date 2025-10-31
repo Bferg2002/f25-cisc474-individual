@@ -15,6 +15,17 @@ export class GradesController {
   }
 
   // ──────────────────────────────
+// GET — All grades for a specific course + user
+// ──────────────────────────────
+@Get(':courseId/:userId')
+findAllForCourseAndUser(
+  @Param('courseId') courseId: string,
+  @Param('userId') userId: string,
+) {
+  return this.gradesService.findAllForCourseAndUser(+courseId, +userId);
+}
+
+  // ──────────────────────────────
   // GET — One specific grade (by user + assignment)
   // ──────────────────────────────
   @Get(':userId/:assignmentId')

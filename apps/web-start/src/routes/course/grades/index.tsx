@@ -1,40 +1,44 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
-import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher';
-import styles from './index.module.css';
-import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades';
-
+import { Link, createFileRoute } from '@tanstack/react-router'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher'
+import LogoutButton from '../../../components/LogoutButton'
+import styles from './index.module.css'
+import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades'
 
 // ✅ Fixed route path
 export const Route = createFileRoute('/course/grades/')({
   component: RouteComponent,
-});
+})
 
 function RouteComponent() {
-  const queryClient = useQueryClient();
-  const currentUserId = 2; // placeholder for logged-in user
+  const queryClient = useQueryClient()
 
+  // Hardcoded placeholders for now (Auth0 not set up)
+  const currentUserId = 1
+  const courseId = 1
+
+  // ✅ Fetch all grades for the specific course + user
   const { data: grades, isLoading, error } = useQuery<Array<GradeOut>>({
-    queryKey: ['grades', currentUserId],
-    queryFn: () => fetchGradesByUser(currentUserId),
-  });
+    queryKey: ['grades', courseId, currentUserId],
+    queryFn: () => fetchGradesByUser(courseId, currentUserId),
+  })
 
-  const [selectedGrade, setSelectedGrade] = useState<GradeOut | null>(null);
+  const [selectedGrade, setSelectedGrade] = useState<GradeOut | null>(null)
 
-  // CREATE
+  // ✅ CREATE
   const createMutation = useMutation({
     mutationFn: (newGrade: GradeCreateIn) =>
       mutateBackend<GradeOut>('/grades', 'POST', newGrade),
     onSuccess: (createdGrade: GradeOut) => {
-      queryClient.setQueryData<Array<GradeOut>>(['grades', currentUserId], (old) => [
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) => [
         ...(old ?? []),
         createdGrade,
-      ]);
+      ])
     },
-  });
+  })
 
-  // UPDATE
+  // ✅ UPDATE
   const updateMutation = useMutation({
     mutationFn: (
       updated: GradeUpdateIn & { userId: number; assignmentId: number },
@@ -45,18 +49,18 @@ function RouteComponent() {
         updated,
       ),
     onSuccess: (updatedGrade: GradeOut) => {
-      queryClient.setQueryData<Array<GradeOut>>(['grades', currentUserId], (old) =>
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) =>
         (old ?? []).map((g) =>
           g.userId === updatedGrade.userId && g.assignmentId === updatedGrade.assignmentId
             ? updatedGrade
             : g,
         ),
-      );
-      setSelectedGrade(null);
+      )
+      setSelectedGrade(null)
     },
-  });
+  })
 
-  // DELETE
+  // ✅ DELETE
   const deleteMutation = useMutation({
     mutationFn: (target: { userId: number; assignmentId: number }) =>
       mutateBackend<GradeOut>(
@@ -64,34 +68,35 @@ function RouteComponent() {
         'DELETE',
       ),
     onSuccess: (_, vars) => {
-      queryClient.setQueryData<Array<GradeOut>>(['grades', currentUserId], (old) =>
+      queryClient.setQueryData<Array<GradeOut>>(['grades', courseId, currentUserId], (old) =>
         (old ?? []).filter(
           (g) => !(g.userId === vars.userId && g.assignmentId === vars.assignmentId),
         ),
-      );
+      )
     },
-  });
+  })
 
-  if (isLoading) return <div>Loading grades...</div>;
-  if (error) return <div>Something went wrong! {String(error)}</div>;
+  if (isLoading) return <div>Loading grades...</div>
+  if (error) return <div>Something went wrong! {String(error)}</div>
 
   return (
     <div className="p-6">
-      <h1 className={styles.heading}>Grades for Bryant Ferguson</h1>
+      <h1 className={styles.heading}>Grades for Demo User</h1>
 
       {/* SIDEBARS */}
       <div className={styles.mainSidenav}>
         <Link to="/dashboard" className={styles.link}>Dashboard</Link>
         <Link to="/course" className={styles.link}>Courses</Link>
         <Link to="/calendar" className={styles.link}>Calendar</Link>
+        <LogoutButton />
+
       </div>
 
       <div className={styles.courseSidenav}>
         <Link to="/course" className={styles.link}>Home</Link>
         <span className={styles.linkDisabled}>Syllabus</span>
         <span className={styles.linkDisabled}>Assignments</span>
-        {/* ✅ Link fixed */}
-      <Link to="/course/grades" className={styles.link}>Grades</Link>
+        <Link to="/course/grades" className={styles.link}>Grades</Link>
       </div>
 
       {/* TABLE */}
@@ -164,28 +169,15 @@ function RouteComponent() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-// TYPES
-interface GradesTableProps {
-  grades: Array<GradeOut>;
-  onEdit: (grade: GradeOut) => void;
-  onDelete: (grade: GradeOut) => void;
-}
-interface CreateGradeFormProps {
-  createMutation: ReturnType<typeof useMutation<GradeOut, unknown, GradeCreateIn>>;
-  currentUserId: number;
-}
-interface UpdateGradeFormProps {
-  selectedGrade: GradeOut | null;
-  updateMutation: ReturnType<
-    typeof useMutation<GradeOut, unknown, GradeUpdateIn & { userId: number; assignmentId: number }>
-  >;
-}
+// ============ TABLE ============
+function GradesTable({ grades, onEdit, onDelete }) {
+  if (!grades.length) {
+    return <div style={{ marginTop: '1rem', color: '#777' }}>No grades found.</div>
+  }
 
-// TABLE
-function GradesTable({ grades, onEdit, onDelete }: GradesTableProps) {
   return (
     <div className={styles.gradesTable}>
       <div className={styles.tableHeader}>
@@ -197,13 +189,11 @@ function GradesTable({ grades, onEdit, onDelete }: GradesTableProps) {
         <div className={styles.headerCell}>Actions</div>
       </div>
 
-      {grades.map((grade: GradeOut) => (
+      {grades.map((grade) => (
         <div key={`${grade.assignmentId}-${grade.userId}`} className={styles.tableRow}>
-          <div className={styles.tableCell}>{grade.assignment.name}</div>
+          <div className={styles.tableCell}>{grade.assignment?.name ?? 'Unknown'}</div>
           <div className={styles.tableCell}>{grade.score}</div>
-          <div className={styles.tableCell}>
-            {grade.grade ? grade.grade : <span style={{ color: '#999' }}>—</span>}
-          </div>
+          <div className={styles.tableCell}>{grade.grade || '—'}</div>
           <div className={styles.tableCell}>{grade.published ? 'Yes' : 'No'}</div>
           <div
             className={styles.tableCell}
@@ -220,17 +210,17 @@ function GradesTable({ grades, onEdit, onDelete }: GradesTableProps) {
         </div>
       ))}
     </div>
-  );
+  )
 }
 
-// CREATE FORM
-function CreateGradeForm({ createMutation, currentUserId }: CreateGradeFormProps) {
+// ============ CREATE FORM ============
+function CreateGradeForm({ createMutation, currentUserId }) {
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const data = new FormData(form);
+        e.preventDefault()
+        const form = e.target as HTMLFormElement
+        const data = new FormData(form)
         createMutation.mutate({
           userId: currentUserId,
           assignmentId: Number(data.get('assignmentId')),
@@ -238,9 +228,9 @@ function CreateGradeForm({ createMutation, currentUserId }: CreateGradeFormProps
           score: Number(data.get('score')),
           late: data.get('late') === 'true',
           published: data.get('published') === 'true',
-        });
-        form.reset();
-        setTimeout(() => createMutation.reset(), 1500);
+        })
+        form.reset()
+        setTimeout(() => createMutation.reset(), 1500)
       }}
     >
       <h3>Create Grade</h3>
@@ -264,9 +254,7 @@ function CreateGradeForm({ createMutation, currentUserId }: CreateGradeFormProps
         <option value="false">Not Published</option>
       </select>
 
-      <button type="submit" disabled={createMutation.isPending}>
-        ➕ Create
-      </button>
+      <button type="submit" disabled={createMutation.isPending}>➕ Create</button>
 
       {createMutation.isSuccess && <div style={{ color: 'green' }}>✅ Created!</div>}
       {createMutation.isError && (
@@ -278,21 +266,21 @@ function CreateGradeForm({ createMutation, currentUserId }: CreateGradeFormProps
         </div>
       )}
     </form>
-  );
+  )
 }
 
-// UPDATE FORM
-function UpdateGradeForm({ selectedGrade, updateMutation }: UpdateGradeFormProps) {
+// ============ UPDATE FORM ============
+function UpdateGradeForm({ selectedGrade, updateMutation }) {
   if (!selectedGrade) {
-    return <div>Click ✏️ Edit to populate the update form.</div>;
+    return <div>Click ✏️ Edit to populate the update form.</div>
   }
 
   return (
     <form
       onSubmit={(e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const data = new FormData(form);
+        e.preventDefault()
+        const form = e.target as HTMLFormElement
+        const data = new FormData(form)
         updateMutation.mutate({
           userId: selectedGrade.userId,
           assignmentId: selectedGrade.assignmentId,
@@ -306,9 +294,9 @@ function UpdateGradeForm({ selectedGrade, updateMutation }: UpdateGradeFormProps
             data.get('published') === ''
               ? selectedGrade.published
               : data.get('published') === 'true',
-        });
-        form.reset();
-        setTimeout(() => updateMutation.reset(), 1500);
+        })
+        form.reset()
+        setTimeout(() => updateMutation.reset(), 1500)
       }}
     >
       <h3>Update Grade</h3>
@@ -339,5 +327,5 @@ function UpdateGradeForm({ selectedGrade, updateMutation }: UpdateGradeFormProps
         </div>
       )}
     </form>
-  );
+  )
 }

@@ -1,32 +1,44 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useAuth0 } from '@auth0/auth0-react'       // ✅ added
 import { fetchGradesByUser, mutateBackend } from '../../../integrations/fetcher'
 import LogoutButton from '../../../components/LogoutButton'
 import styles from './index.module.css'
 import type { GradeCreateIn, GradeOut, GradeUpdateIn } from '@repo/api/grades'
 
-// ✅ Fixed route path
+// ✅ Protect route with Auth0
 export const Route = createFileRoute('/course/grades/')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { user, isAuthenticated, isLoading, loginWithRedirect } = useAuth0()
+
+  // Wait for Auth0
+  if (isLoading) return <div>Loading authentication...</div>
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    loginWithRedirect()
+    return null
+  }
+
   const queryClient = useQueryClient()
 
-  // Hardcoded placeholders for now (Auth0 not set up)
-  const currentUserId = 1
+  // ✅ Use numeric user ID for DB-based logic
+  const currentUserId = 1 // TEMP: Replace with your numeric ID system later
   const courseId = 1
 
-  // ✅ Fetch all grades for the specific course + user
-  const { data: grades, isLoading, error } = useQuery<Array<GradeOut>>({
+  // ✅ Fetch grades
+  const { data: grades, isLoading: loadingGrades, error } = useQuery<Array<GradeOut>>({
     queryKey: ['grades', courseId, currentUserId],
     queryFn: () => fetchGradesByUser(courseId, currentUserId),
   })
 
   const [selectedGrade, setSelectedGrade] = useState<GradeOut | null>(null)
 
-  // ✅ CREATE
+  // CREATE
   const createMutation = useMutation({
     mutationFn: (newGrade: GradeCreateIn) =>
       mutateBackend<GradeOut>('/grades', 'POST', newGrade),
@@ -38,7 +50,7 @@ function RouteComponent() {
     },
   })
 
-  // ✅ UPDATE
+  // UPDATE
   const updateMutation = useMutation({
     mutationFn: (
       updated: GradeUpdateIn & { userId: number; assignmentId: number },
@@ -60,7 +72,7 @@ function RouteComponent() {
     },
   })
 
-  // ✅ DELETE
+  // DELETE
   const deleteMutation = useMutation({
     mutationFn: (target: { userId: number; assignmentId: number }) =>
       mutateBackend<GradeOut>(
@@ -76,12 +88,12 @@ function RouteComponent() {
     },
   })
 
-  if (isLoading) return <div>Loading grades...</div>
+  if (loadingGrades) return <div>Loading grades...</div>
   if (error) return <div>Something went wrong! {String(error)}</div>
 
   return (
     <div className="p-6">
-      <h1 className={styles.heading}>Grades for Demo User</h1>
+      <h1 className={styles.heading}>Grades for {user?.name ?? 'Demo User'}</h1>
 
       {/* SIDEBARS */}
       <div className={styles.mainSidenav}>
@@ -89,7 +101,6 @@ function RouteComponent() {
         <Link to="/course" className={styles.link}>Courses</Link>
         <Link to="/calendar" className={styles.link}>Calendar</Link>
         <LogoutButton />
-
       </div>
 
       <div className={styles.courseSidenav}>

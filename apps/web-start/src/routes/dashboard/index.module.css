@@ -1,15 +1,22 @@
+/* Center all course boxes nicely */
 .flexContainer {
   display: flex;
-  background-color: white; /* container background */
-  margin-left:25%;
+  justify-content: center; /* centers horizontally */
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
 }
 
 .flexContainer > div {
-  background-color: #f1f1f1; /* box background */
-  margin: 10px;
-  padding: 20px;
+  background-color: #f1f1f1;
+  padding: 20px 40px;
   font-size: 30px;
-  border: 1px solid black; /* black border around each box */
+  border: 1px solid black;
+  transition: background 0.2s;
+}
+
+.flexContainer > div:hover {
+  background-color: #e2e2e2;
 }
 
 /* Sidebar */
@@ -35,3 +42,36 @@
   color: #f1f1f1;
 }
 
+.dashboardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 220px; /* shifts everything away from sidebar */
+  padding: 20px;
+}
+
+.userName {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.dashboardWrapper {
+  display: flex;
+  min-height: 100vh;
+}
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centers horizontally */
+  justify-content: flex-start;
+  padding: 40px;
+  margin-left: 160px; /* matches sidebar width */
+  text-align: center;
+}
+
+.userName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}

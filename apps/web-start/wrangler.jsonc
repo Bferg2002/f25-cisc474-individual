@@ -1,11 +1,1 @@
-{
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "cisc474-individual-project",
-  "compatibility_date": "2025-11-03",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "dist/server/index.js",
-  "site": {
-    "bucket": "dist/client"
-  }
-}
-
+{ "$schema": "node_modules/wrangler/config-schema.json", "name": "tanstack-start-app", "compatibility_date": "2025-09-02", "compatibility_flags": ["nodejs_compat"], "main": "@tanstack/react-start/server-entry", }

@@ -70,6 +70,7 @@ function RouteComponent() {
         <h1 className={styles.heading}>CISC474</h1>
         <h1 className="text-2xl font-bold mb-4">Course</h1>
 
+
         {/* Main Canvas Sidebar - Left */}
         <div className={styles.mainSidenav}>
           <Link to="/dashboard" className={styles.link}>Dashboard</Link>

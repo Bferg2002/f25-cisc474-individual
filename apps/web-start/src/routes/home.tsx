@@ -6,6 +6,8 @@ export const Route = createFileRoute('/home')({
   ssr: false, // 👈 avoids SSR hydration mismatch
 });
 
+
+
 function RouteComponent() {
   const { user, isAuthenticated, isLoading } = useAuth0();
 
